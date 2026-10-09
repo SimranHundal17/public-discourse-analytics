@@ -1,0 +1,31 @@
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+
+# Python environments, bytecode, and tooling
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Editors and operating-system metadata
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local datasets; keep only explicitly written documentation
+data/raw/*
+!data/raw/README.md
+data/cleaned/*
+!data/cleaned/README.md
+data/processed/*
+!data/processed/README.md
+
+# Quarto working files
+.quarto/

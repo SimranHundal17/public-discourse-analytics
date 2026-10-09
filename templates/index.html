@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public Attention & Institutional Priorities Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://unpkg.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-mark"><i data-lucide="bar-chart-3"></i></div>
+                <h1>Public Attention & Institutional Priorities</h1>
+            </div>
+
+            <nav class="tab-nav" aria-label="Dashboard tabs">
+                <button class="tab-button active" type="button" data-tab="public">
+                    <i data-lucide="radio"></i>
+                    <span>Public Discourse</span>
+                </button>
+                <button class="tab-button" type="button" data-tab="institutional">
+                    <i data-lucide="landmark"></i>
+                    <span>Institutional Priorities</span>
+                </button>
+                <button class="tab-button" type="button" data-tab="alignment">
+                    <i data-lucide="git-compare-arrows"></i>
+                    <span>Alignment Comparison</span>
+                </button>
+            </nav>
+        </aside>
+
+        <main class="content">
+            <div id="dashboardError" class="error-banner hidden" role="alert"></div>
+
+            <section id="public" class="tab-panel active">
+                <header class="section-header">
+                    <div>
+                        <p class="eyebrow">Public Discourse</p>
+                        <h2>What topics receive public and media attention?</h2>
+                        <p>Reddit posts and news articles are combined to show the public-facing discourse around each topic.</p>
+                    </div>
+                </header>
+
+                <div id="publicKpis" class="kpi-grid"></div>
+
+                <div class="chart-grid">
+                    <article class="panel wide primary-chart">
+                        <div class="panel-heading">
+                            <h3><i data-lucide="activity"></i> Public Discourse by Topic</h3>
+                            <p>Combined Reddit and news records by dashboard topic.</p>
+                        </div>
+                        <div class="chart-wrap tall"><canvas id="publicTopicBarChart"></canvas></div>
+                    </article>
+
+                    <article class="panel">
+                        <div class="panel-heading">
+                            <h3><i data-lucide="pie-chart"></i> Public Discourse Share</h3>
+                            <p>Percentage contribution of each topic.</p>
+                        </div>
+                        <div class="chart-wrap"><canvas id="publicShareChart"></canvas></div>
+                    </article>
+
+                    <article class="panel">
+                        <div class="panel-heading">
+                            <h3><i data-lucide="trending-up"></i> Monthly Reddit Topic Trend</h3>
+                            <p>Topic-level Reddit activity for 2022-2023.</p>
+                        </div>
+                        <div class="chart-wrap"><canvas id="redditMonthlyTrendChart"></canvas></div>
+                    </article>
+                </div>
+            </section>
+
+            <section id="institutional" class="tab-panel">
+                <header class="section-header">
+                    <div>
+                        <p class="eyebrow">Institutional Priorities</p>
+                        <h2>How governments and institutions allocate priorities.</h2>
+                        <p>Government expenditure and institutional metrics are compared by topic and country.</p>
+                    </div>
+                </header>
+
+                <div id="institutionalKpis" class="kpi-grid"></div>
+
+                <div class="chart-grid">
+                    <article class="panel">
+                        <div class="panel-heading">
+                            <h3><i data-lucide="wallet-cards"></i> Government Expenditure by Topic</h3>
+                            <p>Total expenditure grouped by topic.</p>
+                        </div>
+                        <div class="chart-wrap"><canvas id="governmentTopicChart"></canvas></div>
+                    </article>
+
+                    <article class="panel">
+                        <div class="panel-heading">
+                            <h3><i data-lucide="badge-check"></i> Institutional Metrics by Topic</h3>
+                            <p>Average institutional metric values.</p>
+                        </div>
+                        <div class="chart-wrap"><canvas id="institutionTopicChart"></canvas></div>
+                    </article>
+
+                    <article class="panel wide map-panel">
+                        <div class="panel-heading split">
+                            <div>
+                                <h3><i data-lucide="globe-2"></i> Country Explorer</h3>
+                                <p>Select a country on the map or use the dropdown to update the detail charts.</p>
+                            </div>
+                            <div class="country-controls">
+                                <select id="countrySelect" aria-label="Select country"></select>
+                                <button id="resetCountry" class="secondary-button" type="button">Reset</button>
+                            </div>
+                        </div>
+
+                        <div class="map-detail-grid">
+                            <div>
+                                <div id="worldMap" class="world-map" aria-label="Interactive world map"></div>
+                                <p id="selectedCountryLabel" class="selected-country">Selected country: Germany</p>
+                            </div>
+                            <div class="country-chart-stack">
+                                <div class="mini-chart">
+                                    <h4>Country Expenditure by Topic</h4>
+                                    <div id="countryExpenditureEmpty" class="empty-state hidden">No government expenditure data available for this country.</div>
+                                    <div class="chart-wrap compact"><canvas id="countryExpenditureChart"></canvas></div>
+                                </div>
+                                <div class="mini-chart">
+                                    <h4>Country Institutional Metrics by Topic</h4>
+                                    <div id="countryInstitutionEmpty" class="empty-state hidden">No institutional metrics available for this country.</div>
+                                    <div class="chart-wrap compact"><canvas id="countryInstitutionChart"></canvas></div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="panel">
+                        <div class="panel-heading">
+                            <h3><i data-lucide="list-ordered"></i> Top Countries by Government Expenditure</h3>
+                            <p>Highest total expenditure across topics.</p>
+                        </div>
+                        <div class="chart-wrap"><canvas id="topGovernmentCountriesChart"></canvas></div>
+                    </article>
+
+                    <article class="panel">
+                        <div class="panel-heading">
+                            <h3><i data-lucide="trophy"></i> Top Countries by Institutional Metrics</h3>
+                            <p>Highest average institutional performance.</p>
+                        </div>
+                        <div class="chart-wrap"><canvas id="topInstitutionCountriesChart"></canvas></div>
+                    </article>
+                </div>
+            </section>
+
+            <section id="alignment" class="tab-panel">
+                <header class="section-header">
+                    <div>
+                        <p class="eyebrow">Alignment Comparison</p>
+                        <h2>Where public attention and government priorities align or diverge.</h2>
+                        <p>Shares are compared as percentages so public discourse is not directly compared with raw expenditure values.</p>
+                    </div>
+                </header>
+
+                <div id="alignmentInsights" class="insight-grid"></div>
+                <article class="key-finding-card">
+                    <div>
+                        <p class="eyebrow">Key Finding</p>
+                        <p>Public attention is concentrated around AI/Technology and Politics, while government expenditure is concentrated more heavily in Health and Education. This shows that public discourse and institutional spending priorities do not fully align.</p>
+                    </div>
+                </article>
+
+                <div class="chart-grid">
+                    <article class="panel wide">
+                        <div class="panel-heading">
+                            <h3><i data-lucide="columns-3"></i> Public Attention Share vs Government Expenditure Share</h3>
+                            <p>Grouped percentage comparison by topic.</p>
+                        </div>
+                        <div class="chart-wrap tall"><canvas id="shareComparisonChart"></canvas></div>
+                    </article>
+
+                    <article class="panel wide">
+                        <div class="panel-heading">
+                            <h3><i data-lucide="split"></i> Priority Gap Analysis</h3>
+                            <p>Positive values indicate higher public attention; negative values indicate higher government priority.</p>
+                        </div>
+                        <div class="chart-wrap tall"><canvas id="priorityGapChart"></canvas></div>
+                    </article>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/map.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>
